@@ -1,0 +1,7 @@
+What made it easier for you to implement the view? W
+When I learned how to use String formating made it a lot easier.
+Also, XML is too similar to HTML, and I'm familiar with it
+
+hat made it difficult for you to implement the view?
+I hate handling intents, that's hard, cus' I don't like that the intents are global and use an adapter for it.
+I also had variable problems, because of I can't get a fit with kotlin

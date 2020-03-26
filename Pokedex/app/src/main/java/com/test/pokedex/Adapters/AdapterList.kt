@@ -1,6 +1,7 @@
 package com.test.pokedex.Adapters
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -9,16 +10,18 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.koushikdutta.ion.Ion
+import com.test.pokedex.Activities.ActivityDetails
 import com.test.pokedex.R
 
-class AdapterList:RecyclerView.Adapter<AdapterList.ViewHolder>() {
+class AdapterList :RecyclerView.Adapter<AdapterList.ViewHolder>() {
 
-    private lateinit var data:JsonArray
     private lateinit var context: Context
+    private lateinit var data:JsonArray
 
     fun AdapterList(context:Context,data:JsonArray){
         this.context = context
@@ -38,14 +41,28 @@ class AdapterList:RecyclerView.Adapter<AdapterList.ViewHolder>() {
         var item:JsonObject = data.get(position).asJsonObject
 
         holder.bind(item,context)
+
     }
 
-    class ViewHolder(view: View):RecyclerView.ViewHolder(view){
+    class ViewHolder(view:View):RecyclerView.ViewHolder(view){
         private var imagePokemon: ImageView = view.findViewById(R.id.pokemon_image)
-        private var namePokemon:TextView  = view.findViewById(R.id.pokemon_name)
+        private var namePokemon: TextView   = view.findViewById(R.id.pokemon_name)
+        private var detailsView = view
 
-        fun bind(item:JsonObject,context:Context){
-          namePokemon.setText(item.get("name").asString)
+        fun bind(item:JsonObject,context: Context){
+            detailsView.tag = position
+
+            imagePokemon.setOnClickListener {
+                val clickedPosition = detailsView.tag as Int
+                var intent: Intent = Intent(context, ActivityDetails::class.java)
+
+                intent.putExtra("Number", (clickedPosition + 1).toString())
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+
+                context.startActivity(intent)
+            }
+
+            namePokemon.setText(item.get("name").asString)
 
             Ion.with(context)
                 .load(item.get("url").asString)
@@ -54,22 +71,34 @@ class AdapterList:RecyclerView.Adapter<AdapterList.ViewHolder>() {
                     if(e == null){
                         if(!result.get("sprites").isJsonNull){
                             if(result.get("sprites").asJsonObject.get("front_default") != null){
-                                //Pintar
+                                Log.i("Salida", result.get("sprites").asJsonObject.get("front_default").asString)
+
                                 Glide
                                     .with(context)
                                     .load(result.get("sprites").asJsonObject.get("front_default").asString)
                                     .placeholder(R.drawable.pokemon_logo_min)
                                     .error(R.drawable.pokemon_logo_min)
                                     .into(imagePokemon);
+
+
                             }else{
                                 imagePokemon.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.pokemon_logo_min))
                             }
+
                         }else{
                             imagePokemon.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.pokemon_logo_min))
                         }
+
                     }
                 }
+
         }
 
     }
+
+
+
+
+
+
 }
